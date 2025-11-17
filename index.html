@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Productos - Mayor y Detalle</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 12px;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+        }
+        
+        .form-section, .client-info {
+            background-color: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            flex: 1 1 auto;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-warning {
+            background-color: #f39c12;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+        
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e1e1e1;
+            font-size: 14px;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .totals {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .total-box {
+            flex: 1 1 200px;
+            text-align: center;
+            padding: 18px 12px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #3498db;
+        }
+        
+        .total-box h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .total-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .actions {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .client-info h2, .form-section h2, .saved-lists h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .client-info h2::before, .form-section h2::before, .saved-lists h2::before {
+            content: "•";
+            color: #3498db;
+            margin-right: 8px;
+            font-size: 24px;
+        }
+        
+        .saved-lists {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .saved-list-item {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: white;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+        
+        .saved-list-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .saved-list-info {
+            flex: 1 1 300px;
+            margin-bottom: 10px;
+        }
+        
+        .saved-list-info h3 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .saved-list-info p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .saved-list-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .saved-list-actions .btn {
+            flex: 0 1 auto;
+            min-width: 80px;
+            font-size: 14px;
+            padding: 8px 12px;
+        }
+        
+        /* Estilos específicos para móviles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+                border-radius: 8px;
+            }
+            
+            .form-section, .client-info {
+                padding: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 3px 0;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .total-box {
+                flex: 1 1 100%;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+            
+            .saved-list-item {
+                padding: 12px;
+            }
+            
+            .saved-list-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .saved-list-actions .btn {
+                flex: 1;
+                margin: 2px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 12px;
+            }
+            
+            h1 {
+                font-size: 1.4rem;
+                margin-bottom: 20px;
+            }
+            
+            .form-section, .client-info {
+                padding: 12px;
+            }
+            
+            input, select {
+                padding: 10px;
+                font-size: 16px; /* Previene zoom en iOS */
+            }
+            
+            .table-container {
+                font-size: 13px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+            
+            .total-box {
+                padding: 15px 10px;
+            }
+            
+            .total-value {
+                font-size: 18px;
+            }
+        }
+        
+        /* Mejoras para tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .saved-list-item {
+                flex-direction: row;
+            }
+            
+            .saved-list-info {
+                flex: 2;
+            }
+            
+            .saved-list-actions {
+                flex: 1;
+                justify-content: flex-end;
+            }
+        }
+        
+        /* Estados de carga y mensajes */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        /* Mejoras de accesibilidad */
+        @media (prefers-reduced-motion: reduce) {
+            .btn, .saved-list-item {
+                transition: none;
+            }
+        }
+        
+        /* Enfoque visible para teclado */
+        .btn:focus, input:focus, select:focus {
+            outline: 2px solid #3498db;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Productos - Precios Mayor y Detalle</h1>
+        
+        <div class="client-info">
+            <h2>Información del Cliente</h2>
+            <div class="form-group">
+                <label for="clientName">Nombre del Cliente</label>
+                <input type="text" id="clientName" placeholder="Ingrese el nombre del cliente">
+            </div>
+            <div class="form-group">
+                <label for="saleDate">Fecha de Venta</label>
+                <input type="date" id="saleDate">
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2>Agregar Producto</h2>
+            <div class="form-group">
+                <label for="productName">Nombre del Producto</label>
+                <input type="text" id="productName" placeholder="Ingrese el nombre del producto">
+            </div>
+            
+            <div class="form-group">
+                <label for="productCode">Código</label>
+                <input type="text" id="productCode" placeholder="Código del producto">
+            </div>
+            
+            <div class="form-group">
+                <label for="productQuantity">Cantidad</label>
+                <input type="number" id="productQuantity" min="1" value="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="wholesalePrice">Precio al por Mayor</label>
+                <input type="number" id="wholesalePrice" min="0" step="0.01" placeholder="Precio al por mayor">
+            </div>
+            
+            <div class="form-group">
+                <label for="retailPrice">Precio al Detalle</label>
+                <input type="number" id="retailPrice" min="0" step="0.01" placeholder="Precio al detalle">
+            </div>
+            
+            <button class="btn" id="addProductBtn">Agregar Producto</button>
+        </div>
+        
+        <div class="table-section">
+            <h2>Lista de Productos</h2>
+            <div class="table-container">
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Código</th>
+                            <th>Cantidad</th>
+                            <th>Precio Mayor</th>
+                            <th>Precio Detalle</th>
+                            <th>Valor Mayor</th>
+                            <th>Valor Detalle</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <!-- Los productos se agregarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="totals">
+            <div class="total-box">
+                <h3>Total Valor al por Mayor</h3>
+                <div class="total-value" id="totalWholesale">$0.00</div>
+            </div>
+            <div class="total-box">
+                <h3>Total Valor al Detalle</h3>
+                <div class="total-value" id="totalRetail">$0.00</div>
+            </div>
+            <div class="total-box">
+                <h3>Diferencia</h3>
+                <div class="total-value" id="totalDifference">$0.00</div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn btn-success" id="saveDataBtn">Guardar Lista</button>
+            <button class="btn btn-warning" id="downloadPdfBtn">Descargar PDF</button>
+            <button class="btn" id="downloadCsvBtn">Descargar CSV</button>
+            <button class="btn btn-danger" id="clearDataBtn">Limpiar Todo</button>
+        </div>
+        
+        <div class="saved-lists">
+            <h2>Listas Guardadas</h2>
+            <div id="savedListsContainer">
+                <!-- Las listas guardadas aparecerán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array para almacenar los productos
+        let products = [];
+        let savedLists = [];
+        
+        // Elementos del DOM
+        const clientNameInput = document.getElementById('clientName');
+        const saleDateInput = document.getElementById('saleDate');
+        const productNameInput = document.getElementById('productName');
+        const productCodeInput = document.getElementById('productCode');
+        const productQuantityInput = document.getElementById('productQuantity');
+        const wholesalePriceInput = document.getElementById('wholesalePrice');
+        const retailPriceInput = document.getElementById('retailPrice');
+        const addProductBtn = document.getElementById('addProductBtn');
+        const productsTableBody = document.getElementById('productsTableBody');
+        const totalWholesaleElement = document.getElementById('totalWholesale');
+        const totalRetailElement = document.getElementById('totalRetail');
+        const totalDifferenceElement = document.getElementById('totalDifference');
+        const saveDataBtn = document.getElementById('saveDataBtn');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        const savedListsContainer = document.getElementById('savedListsContainer');
+        
+        // Establecer fecha actual por defecto
+        window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            saleDateInput.value = today;
+            loadSavedLists();
+        });
+        
+        // Función para agregar un producto
+        function addProduct() {
+            const name = productNameInput.value.trim();
+            const code = productCodeInput.value.trim();
+            const quantity = parseInt(productQuantityInput.value);
+            const wholesalePrice = parseFloat(wholesalePriceInput.value);
+            const retailPrice = parseFloat(retailPriceInput.value);
+            
+            if (!name || !code || isNaN(quantity) || isNaN(wholesalePrice) || isNaN(retailPrice)) {
+                alert('Por favor, complete todos los campos correctamente.');
+                return;
+            }
+            
+            const product = {
+                id: Date.now(), // ID único basado en timestamp
+                name,
+                code,
+                quantity,
+                wholesalePrice,
+                retailPrice,
+                wholesaleValue: quantity * wholesalePrice,
+                retailValue: quantity * retailPrice
+            };
+            
+            products.push(product);
+            updateTable();
+            updateTotals();
+            clearForm();
+        }
+        
+        // Función para actualizar la tabla
+        function updateTable() {
+            productsTableBody.innerHTML = '';
+            
+            if (products.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="8" class="empty-state">
+                        No hay productos en la lista. Agregue algunos productos para comenzar.
+                    </td>
+                `;
+                productsTableBody.appendChild(emptyRow);
+                return;
+            }
+            
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.code}</td>
+                    <td>${product.quantity}</td>
+                    <td>$${product.wholesalePrice.toFixed(2)}</td>
+                    <td>$${product.retailPrice.toFixed(2)}</td>
+                    <td>$${product.wholesaleValue.toFixed(2)}</td>
+                    <td>$${product.retailValue.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="removeProduct(${product.id})">Eliminar</button>
+                    </td>
+                `;
+                
+                productsTableBody.appendChild(row);
+            });
+        }
+        
+        // Función para actualizar los totales
+        function updateTotals() {
+            const totalWholesale = products.reduce((sum, product) => sum + product.wholesaleValue, 0);
+            const totalRetail = products.reduce((sum, product) => sum + product.retailValue, 0);
+            const difference = totalRetail - totalWholesale;
+            
+            totalWholesaleElement.textContent = `$${totalWholesale.toFixed(2)}`;
+            totalRetailElement.textContent = `$${totalRetail.toFixed(2)}`;
+            totalDifferenceElement.textContent = `$${difference.toFixed(2)}`;
+        }
+        
+        // Función para limpiar el formulario
+        function clearForm() {
+            productNameInput.value = '';
+            productCodeInput.value = '';
+            productQuantityInput.value = '1';
+            wholesalePriceInput.value = '';
+            retailPriceInput.value = '';
+            productNameInput.focus();
+        }
+        
+        // Función para eliminar un producto
+        function removeProduct(id) {
+            products = products.filter(product => product.id !== id);
+            updateTable();
+            updateTotals();
+        }
+        
+        // Función para guardar la lista actual
+        function saveCurrentList() {
+            const clientName = clientNameInput.value.trim();
+            const saleDate = saleDateInput.value;
+            
+            if (!clientName) {
+                alert('Por favor, ingrese el nombre del cliente.');
+                return;
+            }
+            
+            if (products.length === 0) {
+                alert('No hay productos en la lista para guardar.');
+                return;
+            }
+            
+            const listData = {
+                id: Date.now(),
+                clientName,
+                saleDate,
+                products: [...products],
+                totalWholesale: products.reduce((sum, product) => sum + product.wholesaleValue, 0),
+                totalRetail: products.reduce((sum, product) => sum + product.retailValue, 0),
+                createdAt: new Date().toISOString()
+            };
+            
+            savedLists.push(listData);
+            saveToLocalStorage();
+            loadSavedLists();
+            alert('Lista guardada correctamente.');
+        }
+        
+        // Función para cargar listas guardadas
+        function loadSavedLists() {
+            savedListsContainer.innerHTML = '';
+            
+            if (savedLists.length === 0) {
+                savedListsContainer.innerHTML = `
+                    <div class="empty-state">
+                        No hay listas guardadas. Guarde una lista para verla aquí.
+                    </div>
+                `;
+                return;
+            }
+            
+            savedLists.forEach(list => {
+                const listElement = document.createElement('div');
+                listElement.className = 'saved-list-item';
+                
+                listElement.innerHTML = `
+                    <div class="saved-list-info">
+                        <h3>${list.clientName}</h3>
+                        <p>Fecha: ${new Date(list.saleDate).toLocaleDateString()} | 
+                           Productos: ${list.products.length} | 
+                           Total Mayor: $${list.totalWholesale.toFixed(2)} | 
+                           Total Detalle: $${list.totalRetail.toFixed(2)}</p>
+                    </div>
+                    <div class="saved-list-actions">
+                        <button class="btn" onclick="loadList(${list.id})">Cargar</button>
+                        <button class="btn btn-warning" onclick="downloadListPdf(${list.id})">PDF</button>
+                        <button class="btn btn-danger" onclick="deleteList(${list.id})">Eliminar</button>
+                    </div>
+                `;
+                
+                savedListsContainer.appendChild(listElement);
+            });
+        }
+        
+        // Función para cargar una lista específica
+        function loadList(id) {
+            const list = savedLists.find(l => l.id === id);
+            if (!list) return;
+            
+            clientNameInput.value = list.clientName;
+            saleDateInput.value = list.saleDate;
+            products = [...list.products];
+            
+            updateTable();
+            updateTotals();
+            
+            // Desplazar hacia el formulario
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Función para eliminar una lista guardada
+        function deleteList(id) {
+            if (confirm('¿Está seguro de que desea eliminar esta lista?')) {
+                savedLists = savedLists.filter(list => list.id !== id);
+                saveToLocalStorage();
+                loadSavedLists();
+            }
+        }
+        
+        // Función para guardar en localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('savedProductLists', JSON.stringify(savedLists));
+        }
+        
+        // Función para cargar desde localStorage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('savedProductLists');
+            if (savedData) {
+                savedLists = JSON.parse(savedData);
+            }
+        }
+        
+        // Función para descargar PDF de la lista actual
+        function downloadCurrentPdf() {
+            if (products.length === 0) {
+                alert('No hay productos en la lista para descargar.');
+                return;
+            }
+            
+            const clientName = clientNameInput.value.trim() || 'Sin nombre';
+            const saleDate = saleDateInput.value || new Date().toISOString().split('T')[0];
+            
+            generatePdf(clientName, saleDate, products);
+        }
+        
+        // Función para descargar PDF de una lista guardada
+        function downloadListPdf(id) {
+            const list = savedLists.find(l => l.id === id);
+            if (!list) return;
+            
+            generatePdf(list.clientName, list.saleDate, list.products);
+        }
+        
+        // Función para generar PDF
+        function generatePdf(clientName, saleDate, productList) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(20);
+            doc.text('Lista de Productos', 105, 15, { align: 'center' });
+            
+            // Información del cliente
+            doc.setFontSize(12);
+            doc.text(`Cliente: ${clientName}`, 20, 25);
+            doc.text(`Fecha: ${new Date(saleDate).toLocaleDateString()}`, 20, 32);
+            
+            // Tabla de productos
+            const tableColumn = ["Producto", "Código", "Cantidad", "P. Mayor", "P. Detalle", "V. Mayor", "V. Detalle"];
+            const tableRows = [];
+            
+            productList.forEach(product => {
+                const productData = [
+                    product.name,
+                    product.code,
+                    product.quantity.toString(),
+                    `$${product.wholesalePrice.toFixed(2)}`,
+                    `$${product.retailPrice.toFixed(2)}`,
+                    `$${product.wholesaleValue.toFixed(2)}`,
+                    `$${product.retailValue.toFixed(2)}`
+                ];
+                tableRows.push(productData);
+            });
+            
+            // Agregar totales
+            const totalWholesale = productList.reduce((sum, product) => sum + product.wholesaleValue, 0);
+            const totalRetail = productList.reduce((sum, product) => sum + product.retailValue, 0);
+            const difference = totalRetail - totalWholesale;
+            
+            tableRows.push(["", "", "", "", "TOTALES:", `$${totalWholesale.toFixed(2)}`, `$${totalRetail.toFixed(2)}`]);
+            tableRows.push(["", "", "", "", "DIFERENCIA:", "", `$${difference.toFixed(2)}`]);
+            
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 40,
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [52, 152, 219] }
+            });
+            
+            // Guardar PDF
+            doc.save(`Lista_${clientName}_${saleDate}.pdf`);
+        }
+        
+        // Función para descargar CSV
+        function downloadCsv() {
+            if (products.length === 0) {
+                alert('No hay datos para descargar.');
+                return;
+            }
+            
+            const clientName = clientNameInput.value.trim() || 'Sin nombre';
+            const saleDate = saleDateInput.value || new Date().toISOString().split('T')[0];
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            // Encabezados
+            csvContent += "Cliente,Fecha Venta,Producto,Código,Cantidad,Precio Mayor,Precio Detalle,Valor Mayor,Valor Detalle\n";
+            
+            // Datos
+            products.forEach(product => {
+                const row = [
+                    clientName,
+                    saleDate,
+                    product.name,
+                    product.code,
+                    product.quantity,
+                    product.wholesalePrice,
+                    product.retailPrice,
+                    product.wholesaleValue,
+                    product.retailValue
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+            
+            // Totales
+            const totalWholesale = products.reduce((sum, product) => sum + product.wholesaleValue, 0);
+            const totalRetail = products.reduce((sum, product) => sum + product.retailValue, 0);
+            const difference = totalRetail - totalWholesale;
+            
+            csvContent += `,,,TOTALES,,,,${totalWholesale.toFixed(2)},${totalRetail.toFixed(2)}\n`;
+            csvContent += `,,,DIFERENCIA,,,,,${difference.toFixed(2)}`;
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `lista_${clientName}_${saleDate}.csv`);
+            document.body.appendChild(link);
+            
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Función para limpiar todos los datos
+        function clearData() {
+            if (confirm('¿Está seguro de que desea eliminar todos los datos de la lista actual?')) {
+                products = [];
+                clientNameInput.value = '';
+                saleDateInput.value = new Date().toISOString().split('T')[0];
+                updateTable();
+                updateTotals();
+            }
+        }
+        
+        // Event Listeners
+        addProductBtn.addEventListener('click', addProduct);
+        saveDataBtn.addEventListener('click', saveCurrentList);
+        downloadPdfBtn.addEventListener('click', downloadCurrentPdf);
+        downloadCsvBtn.addEventListener('click', downloadCsv);
+        clearDataBtn.addEventListener('click', clearData);
+        
+        // Permitir agregar producto con Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addProduct();
+            }
+        });
+        
+        // Cargar datos al iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            loadSavedLists();
+        });
+    </script>
+</body>
+</html>
